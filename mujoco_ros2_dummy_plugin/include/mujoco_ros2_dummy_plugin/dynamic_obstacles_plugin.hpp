@@ -6,6 +6,8 @@
 #include <vector>
 #include <random>
 #include <rclcpp/rclcpp.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <dual_arm_reactive_control/msg/collision_object.hpp>
 
 #include "mujoco_ros/ros_two/plugin_utils.hpp"
 #include "mujoco_ros/common_types.hpp"
@@ -18,6 +20,7 @@ public:
     mujoco_ros::CallbackReturn on_configure(const rclcpp_lifecycle::State &/*previous_state*/) override;
     ~DynamicObstaclesPlugin() override;
     void ControlCallback(const mjModel* model, mjData* data) override;
+    void PassiveCallback(const mjModel* model, mjData* data) override;
 
 protected:
     bool Load(const mjModel *m, mjData *d) override;
@@ -38,6 +41,8 @@ private:
     
     std::mt19937 gen_;
     std::uniform_real_distribution<> dis_;
+
+    rclcpp::Publisher<dual_arm_reactive_control::msg::CollisionObject>::SharedPtr obstacle_pub_;
 };
 
 } // namespace mujoco_ros

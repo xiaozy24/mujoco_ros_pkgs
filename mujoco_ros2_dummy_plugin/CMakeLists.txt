@@ -12,6 +12,8 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(dual_arm_reactive_control REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 pluginlib_export_plugin_description_file(mujoco_ros plugins.xml)
 
@@ -43,6 +45,8 @@ ament_target_dependencies(
   rclcpp
   "mujoco_ros"
   "pluginlib"
+  "dual_arm_reactive_control"
+  "visualization_msgs"
 )
 
 # uncomment the following section in order to fill in
@@ -91,6 +95,7 @@ ament_export_dependencies(
   rclcpp
   std_msgs
   std_srvs
+  visualization_msgs
 )
 
 ament_package()

@@ -14,6 +14,8 @@
   <depend>std_srvs</depend>
   <depend>pluginlib</depend>
   <depend>mujoco_ros</depend>
+  <depend>visualization_msgs</depend>
+  <depend>dual_arm_reactive_control</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

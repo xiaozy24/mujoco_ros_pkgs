@@ -7,6 +7,7 @@ DynamicObstaclesPlugin::~DynamicObstaclesPlugin() {}
 
 mujoco_ros::CallbackReturn DynamicObstaclesPlugin::on_configure(const rclcpp_lifecycle::State &/*previous_state*/) {
     RCLCPP_INFO(get_my_logger(), "Configuring DynamicObstaclesPlugin");
+    obstacle_pub_ = get_node()->create_publisher<dual_arm_reactive_control::msg::CollisionObject>("/dynamic_obstacle", 10);
     return mujoco_ros::CallbackReturn::SUCCESS;
 }
 
@@ -89,6 +90,40 @@ void DynamicObstaclesPlugin::ControlCallback(const mjModel* model, mjData* data)
             data->qvel[qvel_adr+4] = 0;
             data->qvel[qvel_adr+5] = 0;
         }
+    }
+}
+
+void DynamicObstaclesPlugin::PassiveCallback(const mjModel* model, mjData* data) {
+    if (!obstacle_pub_) return;
+
+    for (const auto& obs : obstacles_) {
+        int joint_id = -1;
+        for (int j = 0; j < model->njnt; j++) {
+            if (model->jnt_bodyid[j] == obs.id) {
+                joint_id = j;
+                break;
+            }
+        }
+
+        if (joint_id == -1) continue;
+
+        int qpos_adr = model->jnt_qposadr[joint_id];
+        mjtNum* pos = &data->qpos[qpos_adr];
+        mjtNum* quat = &data->qpos[qpos_adr + 3];
+
+        auto msg = dual_arm_reactive_control::msg::CollisionObject();
+        msg.id = obs.name;
+        msg.operation = dual_arm_reactive_control::msg::CollisionObject::MOVE;
+        
+        msg.pose.position.x = pos[0];
+        msg.pose.position.y = pos[1];
+        msg.pose.position.z = pos[2];
+        msg.pose.orientation.w = quat[0];
+        msg.pose.orientation.x = quat[1];
+        msg.pose.orientation.y = quat[2];
+        msg.pose.orientation.z = quat[3];
+
+        obstacle_pub_->publish(msg);
     }
 }
 
