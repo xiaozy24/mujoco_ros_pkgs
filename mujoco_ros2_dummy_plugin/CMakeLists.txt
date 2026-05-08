@@ -22,11 +22,25 @@ target_include_directories(dummy_ros2_plugin PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+add_library(dynamic_obstacles_plugin SHARED src/dynamic_obstacles_plugin.cpp)
+target_compile_features(dynamic_obstacles_plugin PUBLIC c_std_99 cxx_std_17)
+target_include_directories(dynamic_obstacles_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 ament_target_dependencies(
   dummy_ros2_plugin
   rclcpp
   std_srvs
   std_msgs
+  "mujoco_ros"
+  "pluginlib"
+)
+
+ament_target_dependencies(
+  dynamic_obstacles_plugin
+  rclcpp
   "mujoco_ros"
   "pluginlib"
 )
@@ -58,7 +72,7 @@ install(
 )
 
 install(
-  TARGETS dummy_ros2_plugin
+  TARGETS dummy_ros2_plugin dynamic_obstacles_plugin
   # EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -69,7 +83,7 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  dummy_ros2_plugin
+  dummy_ros2_plugin dynamic_obstacles_plugin
 )
 ament_export_dependencies(
   mujoco_ros
