@@ -17,7 +17,7 @@ bool DynamicObstaclesPlugin::Load(const mjModel *m, mjData *d) {
     
     std::random_device rd;
     gen_ = std::mt19937(rd());
-    dis_ = std::uniform_real_distribution<>(-0.1, 0.1);
+    dis_ = std::uniform_real_distribution<>(-0.01, 0.01);
 
     obstacles_.clear();
     for (int i = 0; i < m->nbody; i++) {
@@ -56,20 +56,21 @@ void DynamicObstaclesPlugin::ControlCallback(const mjModel* model, mjData* data)
         // Free joint has 7 pos (3 pos, 4 quat)
         mjtNum* pos = &data->qpos[qpos_adr];
         
-        mjtNum dist = mju_norm3(pos);
-        if (dist > 0.8) {
-            // Check if moving away from origin (dot product of position and velocity > 0)
-            mjtNum dot = pos[0]*obs.velocity[0] + pos[1]*obs.velocity[1] + pos[2]*obs.velocity[2];
+        mjtNum rel_pos[3] = {pos[0] - 0.4, pos[1] - 0.0, pos[2] - 0.6};
+        mjtNum dist = mju_norm3(rel_pos);
+        if (dist > 0.3) {
+            // Check if moving away from center (dot product of relative position and velocity > 0)
+            mjtNum dot = rel_pos[0]*obs.velocity[0] + rel_pos[1]*obs.velocity[1] + rel_pos[2]*obs.velocity[2];
             if (dot > 0) {
                 // Reflect velocity vector
-                mjtNum normal[3] = {pos[0]/dist, pos[1]/dist, pos[2]/dist};
+                mjtNum normal[3] = {rel_pos[0]/dist, rel_pos[1]/dist, rel_pos[2]/dist};
                 mjtNum v_dot_n = (obs.velocity[0]*normal[0] + obs.velocity[1]*normal[1] + obs.velocity[2]*normal[2]);
                 
                 obs.velocity[0] -= 2.0 * v_dot_n * normal[0];
                 obs.velocity[1] -= 2.0 * v_dot_n * normal[1];
                 obs.velocity[2] -= 2.0 * v_dot_n * normal[2];
                 
-                RCLCPP_INFO(get_my_logger(), "Obstacle %s reflected. Dist: %.2f Pos: [%.2f %.2f %.2f]", 
+                RCLCPP_DEBUG(get_my_logger(), "Obstacle %s reflected. Dist: %.2f Pos: [%.2f %.2f %.2f]", 
                             obs.name.c_str(), dist, pos[0], pos[1], pos[2]);
             }
         }
@@ -78,7 +79,7 @@ void DynamicObstaclesPlugin::ControlCallback(const mjModel* model, mjData* data)
         // If z coordinate is less than radius (0.10) and moving downwards
         if (pos[2] <= 0.10 && obs.velocity[2] < 0) {
             obs.velocity[2] = -obs.velocity[2];
-            RCLCPP_INFO(get_my_logger(), "Obstacle %s bounced. Z: %.2f", obs.name.c_str(), pos[2]);
+            RCLCPP_DEBUG(get_my_logger(), "Obstacle %s bounced. Z: %.2f", obs.name.c_str(), pos[2]);
         }
 
         // Apply velocities directly to qvel (3 lin, 3 ang)
