@@ -12,7 +12,6 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(dual_arm_reactive_control REQUIRED)
 
 pluginlib_export_plugin_description_file(mujoco_ros plugins.xml)
 
@@ -66,10 +65,6 @@ install(
   RUNTIME DESTINATION bin
 )
 
-add_library(dynamic_obstacles_plugin SHARED src/dynamic_obstacles_plugin.cpp)
-target_compile_features(dynamic_obstacles_plugin PUBLIC cxx_std_17)
-ament_target_dependencies(dynamic_obstacles_plugin rclcpp mujoco_ros pluginlib dual_arm_reactive_control)
-install(TARGETS dynamic_obstacles_plugin LIBRARY DESTINATION lib)
 
 ament_export_include_directories(
   include
