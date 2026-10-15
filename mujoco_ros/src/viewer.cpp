@@ -1,3 +1,4 @@
+#include <mujoco_ros/drag_release.h>
 /* Heavily inspired by MuJoCo's Simulate application with below license: */
 
 // Copyright 2021 DeepMind Technologies Limited
@@ -1706,6 +1707,10 @@ void UiEvent(mjuiState *state)
 
 	// 3D release
 	if (state->type == mjEVENT_RELEASE && state->dragrect == 3 && (viewer->m_ || viewer->is_passive_)) {
+        // Queue the stop; Sync applies it while holding the physics mutex.
+        if (!viewer->is_passive_ && viewer->stop_on_drag_release && viewer->pert.active) {
+            viewer->pending_.stop_released_body = viewer->pert.select;
+        }
 		// stop perturbation
 		viewer->pert.active         = 0;
 		viewer->pending_.newperturb = 0;
@@ -2131,6 +2136,11 @@ void Viewer::Sync()
 	// clear timers once profiler info has been copied
 	ClearTimers(d_.get());
 
+    if (pending_.stop_released_body >= 0) {
+        StopReleasedBody(m_.get(), d_.get(), pending_.stop_released_body);
+        pending_.stop_released_body = -1;
+    }
+
 	if (this->run || this->is_passive_) {
 		// clear old perturbations, apply new
 		mju_zero(d_->xfrc_applied, 6 * m_->nbody);
@@ -2184,6 +2194,7 @@ void Viewer::Load(mjModelPtr m, mjDataPtr d, const char *displayed_filename)
 void Viewer::LoadOnRenderThread()
 {
 	MJR_WARN_NAMED("Viewer", "Loading model in render thread");
+	pending_.stop_released_body = -1;
 	this->m_ = this->mnew_;
 	this->d_ = this->dnew_;
 

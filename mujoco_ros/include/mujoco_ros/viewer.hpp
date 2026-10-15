@@ -199,6 +199,7 @@ public:
 		bool load_from_history;
 		bool load_key;
 		int newperturb;
+		int stop_released_body = -1;
 		bool save_key;
 		bool zero_ctrl;
 		bool select;
@@ -237,6 +238,7 @@ public:
 	int fullscreen   = 0;
 	int vsync        = 1;
 	int busywait     = 0;
+	int stop_on_drag_release = 1;
 
 	// keyframe index
 	int key = 0;
@@ -307,7 +309,7 @@ public:
 
 	// Constant arrays needed for the option section of UI and the UI interface
 	// TODO setting the size here is not ideal
-	const mjuiDef def_option[13] = { { mjITEM_SECTION, "Option", mjPRESERVE, nullptr, "AO" },
+	const mjuiDef def_option[14] = { { mjITEM_SECTION, "Option", mjPRESERVE, nullptr, "AO" },
 		                              { mjITEM_CHECKINT, "Help", 2, &this->help, " #290" },
 		                              { mjITEM_CHECKINT, "Info", 2, &this->info, " #291" },
 		                              { mjITEM_CHECKINT, "Profiler", 2, &this->profiler, " #292" },
@@ -316,6 +318,7 @@ public:
 		                              { mjITEM_CHECKINT, "Fullscreen", 1, &this->fullscreen, " #294" },
 		                              { mjITEM_CHECKINT, "Vertical Sync", 1, &this->vsync, "" },
 		                              { mjITEM_CHECKINT, "Busy Wait", 1, &this->busywait, "" },
+		                              { mjITEM_CHECKINT, "Stop on release", 1, &this->stop_on_drag_release, "" },
 		                              { mjITEM_SELECT, "Spacing", 1, &this->spacing, "Tight\nWide" },
 		                              { mjITEM_SELECT, "Color", 1, &this->color, "Default\nOrange\nWhite\nBlack" },
 		                              { mjITEM_SELECT, "Font", 1, &this->font,

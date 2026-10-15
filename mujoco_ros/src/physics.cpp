@@ -149,8 +149,13 @@ void MujocoEnv::SimPausedPhysics(mjtNum &syncSim)
 			}
 		}
 	} else {
-		// Run mj_forward, to update rendering and joint sliders
+		// Run mj_forward, to update rendering and joint sliders.
+		// A paused evaluation is not an integrated physics step. Do not reuse
+		// its constraint acceleration as the next step's warm start: repeated
+		// forward calls can destabilize stiff stacks when simulation resumes.
+		mju_zero(data_->qacc_warmstart, model_->nv);
 		mj_forward(model_.get(), data_.get());
+		mju_zero(data_->qacc_warmstart, model_->nv);
 		ros_api_->PublishSimTime(data_->time);
 		// Sleep for the difference between the lower bound render rate (30Hz) and the time it took to run the forward
 		// step to reduce cpu load

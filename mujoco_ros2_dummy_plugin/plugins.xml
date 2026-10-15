@@ -1,10 +1,7 @@
+<class_libraries>
 <library path="dummy_ros2_plugin">
   <class type="mujoco_ros::DummyRos2Plugin" base_class_type="mujoco_ros::MujocoPlugin">
     <description>This is a dummy ros2_control plugin.</description>
   </class>
 </library>
-<library path="dynamic_obstacles_plugin">
-  <class type="mujoco_ros::DynamicObstaclesPlugin" base_class_type="mujoco_ros::MujocoPlugin">
-    <description>Plugin to manage dynamic obstacles with custom logic.</description>
-  </class>
-</library>
+</class_libraries>
