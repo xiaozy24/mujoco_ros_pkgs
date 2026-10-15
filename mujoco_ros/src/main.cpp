@@ -167,8 +167,15 @@ int main(int argc, char **argv)
 #endif
 	MJR_INFO_COND(env->settings_.headless, "Running headless");
 
-#if MJR_ROS_VERSION == ROS_2 && RENDER_BACKEND != GLFW_BACKEND
+#if MJR_ROS_VERSION == ROS_2
+#if RENDER_BACKEND == GLFW_BACKEND
+	// Headless GLFW runs have no viewer thread to spin ROS callbacks.
+	if (env->settings_.headless) {
+		executor->spin();
+	}
+#else
 	executor->spin();
+#endif
 #endif
 
 	env->WaitForPhysicsJoin();
